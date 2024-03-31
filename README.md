@@ -6,10 +6,13 @@ This is an n8n community node. It lets you use OpenPGP encryption and signing in
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-[Installation](#installation)  
-[Operations](#operations)  
-[Credentials](#credentials)  
-[Resources](#resources)
+## Table of Contents
+* [Installation](#installation)
+* [Operations](#operations)
+* [Credentials](#credentials)
+* [Resources](#resources)
+* [Screenshots](#screenshots)
+
 
 ## Installation
 
@@ -34,8 +37,19 @@ To authenticate with this node, you need to provide the following credentials:
 - [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
 - [openpgpjs](https://openpgpjs.org/)
 
+## Screenshots
+
+### Credentials
 ![Credentials](./docs/images/credentials.png)
+
+### Encryption
 ![Encrypt](./docs/images/encrypt.png)
+
+### Decryption
 ![Decrypt](./docs/images/decrypt.png)
+
+### Signing
 ![Sign](./docs/images/sign.png)
+
+### Verification
 ![Verify](./docs/images/verify.png)
