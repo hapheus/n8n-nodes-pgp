@@ -39,17 +39,25 @@ export class PgpNode implements INodeType {
 						value: 'encrypt',
 					},
 					{
-						name: 'Decrypt',
-						value: 'decrypt',
-					},
-					{
 						name: 'Sign',
 						value: 'sign',
 					},
 					{
+						name: 'Decrypt',
+						value: 'decrypt',
+					},
+					{
 						name: 'Verify',
 						value: 'verify',
-					}
+					},
+					{
+						name: 'Encrypt And Sign',
+						value: 'encrypt-and-sign',
+					},
+					{
+						name: 'Verify And Decrypt',
+						value: 'verify-and-decrypt',
+					},
 				],
 			},
 			{
@@ -68,7 +76,7 @@ export class PgpNode implements INodeType {
 				placeholder: '-----BEGIN PGP SIGNATURE-----',
 				displayOptions: {
 					show: {
-						'/operation': ['verify'],
+						'/operation': ['verify', 'verify-and-decrypt'],
 					},
 				},
 			},
@@ -114,34 +122,41 @@ export class PgpNode implements INodeType {
 
 				switch (operation) {
 					case 'encrypt':
-						const encryptResult = await openpgp.encrypt({
-							message: await openpgp.createMessage({text: message}),
-							encryptionKeys: pubKey,
-						});
-
 						item.json = {
-							encrypted: encryptResult,
+							encrypted: await openpgp.encrypt({
+								message: await openpgp.createMessage({text: message}),
+								encryptionKeys: pubKey,
+							}),
+						};
+						break;
+					case 'encrypt-and-sign':
+						item.json = {
+							encrypted: await openpgp.encrypt({
+								message: await openpgp.createMessage({text: message}),
+								encryptionKeys: pubKey,
+							}),
+							signature: await openpgp.sign({
+								message: await openpgp.createMessage({text: message}),
+								signingKeys: priKey,
+								detached: true,
+							}),
 						};
 						break;
 					case 'decrypt':
-						const decryptResult = (await openpgp.decrypt({
-							message: await openpgp.readMessage({armoredMessage: message}),
-							decryptionKeys: priKey
-						})).data;
-
 						item.json = {
-							decrypted: decryptResult,
+							decrypted: (await openpgp.decrypt({
+								message: await openpgp.readMessage({armoredMessage: message}),
+								decryptionKeys: priKey
+							})).data,
 						};
 						break;
 					case 'sign':
-						const signResult = await openpgp.sign({
-							message: await openpgp.createMessage({text: message}),
-							signingKeys: priKey,
-							detached: true,
-						});
-
 						item.json = {
-							signature: signResult,
+							signature: await openpgp.sign({
+								message: await openpgp.createMessage({text: message}),
+								signingKeys: priKey,
+								detached: true,
+							}),
 						};
 						break;
 					case 'verify':
@@ -151,7 +166,7 @@ export class PgpNode implements INodeType {
 							signature: await openpgp.readSignature({armoredSignature: signature}),
 							verificationKeys: pubKey,
 						});
-						const { verified } = verification.signatures[0];
+						const {verified} = verification.signatures[0];
 						let isVerified: boolean;
 						try {
 							await verified;
@@ -164,6 +179,30 @@ export class PgpNode implements INodeType {
 							verified: isVerified,
 						};
 
+						break;
+					case 'verify-and-decrypt':
+						signature = this.getNodeParameter('signature', itemIndex) as string;
+						const verification2 = await openpgp.verify({
+							message: await openpgp.createMessage({text: message}),
+							signature: await openpgp.readSignature({armoredSignature: signature}),
+							verificationKeys: pubKey,
+						});
+						const {verified2} = verification2.signatures[0];
+						let isVerified2: boolean;
+						try {
+							await verified2;
+							isVerified2 = true;
+						} catch (e) {
+							isVerified2 = false;
+						}
+
+						item.json = {
+							verified: isVerified2,
+							decrypted: (await openpgp.decrypt({
+								message: await openpgp.readMessage({armoredMessage: message}),
+								decryptionKeys: priKey
+							})).data,
+						};
 						break;
 				}
 			} catch (error) {

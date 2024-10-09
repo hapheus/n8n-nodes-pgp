@@ -24,6 +24,8 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 - Decrypt: Decrypts text using OpenPGP decryption.
 - Sign: Signs text using OpenPGP signing.
 - Verify: Verifies the signature of text using OpenPGP.
+- Encrypt And Sign: Encrypts and signs the message using OpenPGP.
+- Verify And Decrypt: Verifies and Decrypts the message using OpenPGP.
 
 ## Credentials
 
@@ -53,3 +55,9 @@ To authenticate with this node, you need to provide the following credentials:
 
 ### Verification
 ![Verify](./docs/images/verify.png)
+
+### Encrypt and Sign
+![Encrypt and Sign](./docs/images/encrypt-and-sign.png)
+
+### Verify and Decrypt
+![Verify and Decrypt](./docs/images/verify-and-decrypt.png)
