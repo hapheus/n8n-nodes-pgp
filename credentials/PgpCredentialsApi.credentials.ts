@@ -7,6 +7,7 @@ import {
 export class PgpCredentialsApi implements ICredentialType {
 	name = 'pgpCredentialsApi';
 	displayName = 'PGP API';
+	// @ts-ignore
 	icon = 'file:key.svg';
 	documentationUrl = 'https://openpgpjs.org/';
 	properties: INodeProperties[] = [
