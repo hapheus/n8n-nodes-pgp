@@ -24,8 +24,6 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 - Decrypt: Decrypts text using OpenPGP decryption.
 - Sign: Signs text using OpenPGP signing.
 - Verify: Verifies the signature of text using OpenPGP.
-- Encrypt And Sign: Encrypts and signs the message using OpenPGP.
-- Verify And Decrypt: Verifies and Decrypts the message using OpenPGP.
 
 ## Credentials
 
@@ -56,15 +54,9 @@ To authenticate with this node, you need to provide the following credentials:
 ### Verification
 ![Verify](./docs/images/verify.png)
 
-### Encrypt and Sign
-![Encrypt and Sign](./docs/images/encrypt-and-sign.png)
-
-### Verify and Decrypt
-![Verify and Decrypt](./docs/images/verify-and-decrypt.png)
-
 ## Test Results
 
-This section displays the results of unit tests for each operation.
+This section displays the results of unit tests for each operation, based on a live n8n instance.
 
 | Operation            | Last Tested                                               | Status                                                     |
 |----------------------|-----------------------------------------------------------|------------------------------------------------------------|
@@ -72,5 +64,50 @@ This section displays the results of unit tests for each operation.
 | Decrypt              | <span id="test-decrypt-date">2024-11-27</span>            | <span id="test-decrypt-result">✅ Success</span>             |
 | Sign                 | <span id="test-sign-date">2024-11-27</span>               | <span id="test-sign-result">✅ Success</span>                |
 | Verify               | <span id="test-verify-date">2024-11-27</span>             | <span id="test-verify-result">✅ Success</span>              |
-| Encrypt And Sign     | <span id="test-encrypt-and-sign-date">2024-11-27</span>   | <span id="test-encrypt-and-sign-result">✅ Success</span>    |
-| Verify And Decrypt   | <span id="test-verify-and-decrypt-date">2024-11-27</span> | <span id="test-verify-and-decrypt-result">✅ Success</span> |
+
+### Unit Tests
+
+Unit tests can be executed with the following command:
+
+```bash
+npx jest
+```
+
+#### Test Results
+
+**binary-utils.test.ts**
+
+* Convert text data to base64 string
+* Convert base64 string back to text data
+* Convert binary data to base64 string
+* Convert base64 string back to binary data
+
+**sign.test.ts**
+
+* Signs and verifies text message
+* Signs and verifies text message with encrypted private key
+* Verify fails with a different keypair
+* Signs binary data
+* Verify fails with a different keypair
+
+**data-compressor.ts**
+
+* Compresses and decompresses with zlib
+* Compresses and decompresses with zip
+* Throws an error for unsupported algorithm during compression
+* Throws an error for unsupported algorithm during decompression
+
+**encrypt.test.ts**
+
+* Encrypts and decrypts a text message
+* Encrypts and decrypts a text message with encrypted private key
+* Decryption fails with a different private key
+* Encrypts and decrypts a binary file
+* Binary decryption fails with a dirrent private key
+* Encryps and decrypts a compresses binary file
+
+#### Code Coverage:
+* Statements: 100%
+* Branches: 100%
+* Functions: 100%
+* Lines: 100%
