@@ -105,6 +105,7 @@ export class PgpNode implements INodeType {
                 description: 'Choose the compression algorithm',
                 displayOptions: {
                     show: {
+												operation: ['encrypt', 'decrypt'],
                         inputType: ['binary'],
                     },
                 },
@@ -128,7 +129,6 @@ export class PgpNode implements INodeType {
                 type: 'string',
                 displayOptions: {
                     show: {
-                        operation: ['encrypt', 'decrypt'],
                         inputType: ['binary'],
                     },
                 },
