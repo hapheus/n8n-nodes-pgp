@@ -49,7 +49,7 @@
 		"indent": [
 			true,
 			"tabs",
-			2
+			4
 		],
 		"member-access": [
 			true,
@@ -86,12 +86,18 @@
 			"allow-declarations",
 			"allow-named-functions"
 		],
+		"parameters-max-count": [
+			true,
+			{
+				"max": 1,
+				"allow-multiline": true
+			}
+		],
 		"prefer-const": true,
 		"radix": true,
 		"semicolon": [
 			true,
-			"always",
-			"ignore-bound-class-methods"
+			"always"
 		],
 		"switch-default": true,
 		"trailing-comma": [
@@ -111,6 +117,7 @@
 			"allow-null-check"
 		],
 		"use-isnan": true,
+		"quotations": "true! no Quotation",
 		"quotes": [
 			"error",
 			"single"
