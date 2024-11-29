@@ -44,7 +44,10 @@
     "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json",
     "test": "npx --node-options=\"--no-warnings\" jest --verbose",
     "coverage": "npx --node-options=\"--no-warnings\" jest --coverage",
-    "test:watch": "npx --node-options=\"--no-warnings\" jest --watch"
+    "test:watch": "npx --node-options=\"--no-warnings\" jest --watch",
+    "bump:patch": "./scripts/bump-and-publish.sh patch",
+    "bump:minor": "./scripts/bump-and-publish.sh minor",
+    "bump:major": "./scripts/bump-and-publish.sh major"
   },
   "files": [
     "dist"
