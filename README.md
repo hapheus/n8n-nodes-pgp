@@ -58,12 +58,16 @@ To authenticate with this node, you need to provide the following credentials:
 
 This section displays the results of unit tests for each operation, based on a live n8n instance.
 
-| Operation            | Last Tested                                               | Status                                                     |
-|----------------------|-----------------------------------------------------------|------------------------------------------------------------|
-| Encrypt              | <span id="test-encrypt-date">2024-11-27</span>            | <span id="test-encrypt-result">✅ Success</span>            |
-| Decrypt              | <span id="test-decrypt-date">2024-11-27</span>            | <span id="test-decrypt-result">✅ Success</span>             |
-| Sign                 | <span id="test-sign-date">2024-11-27</span>               | <span id="test-sign-result">✅ Success</span>                |
-| Verify               | <span id="test-verify-date">2024-11-27</span>             | <span id="test-verify-result">✅ Success</span>              |
+| Operation        | Last Tested                                           | Status                                                 |
+|------------------|-------------------------------------------------------|--------------------------------------------------------|
+| Encrypt (Text)   | <span id="test-encrypt-text-date">2024-11-29</span>   | <span id="test-encrypt-text-result">✅ Success</span>   |
+| Decrypt (Text)   | <span id="test-decrypt-text-date">2024-11-29</span>   | <span id="test-decrypt-text-result">✅ Success</span>   |
+| Sign (Text)      | <span id="test-sign-text-date">2024-11-29</span>      | <span id="test-sign-text-result">✅ Success</span>      |
+| Verify (Text)    | <span id="test-verify-text-date">2024-11-29</span>    | <span id="test-verify-text-result">✅ Success</span>    |
+| Encrypt (Binary) | <span id="test-encrypt-binary-date">2024-11-29</span> | <span id="test-encrypt-binary-result">✅ Success</span> |
+| Decrypt (Binary) | <span id="test-decrypt-binary-date">2024-11-29</span> | <span id="test-decrypt-binary-result">✅ Success</span> |
+| Sign (Binary)    | <span id="test-sign-binary-date">2024-11-29</span>    | <span id="test-sign-binary-result">✅ Success</span>    |
+| Verify (Binary)  | <span id="test-verify-binary-date">2024-11-29</span>  | <span id="test-verify-binary-result">✅ Success</span>  |
 
 ### Unit Tests
 
