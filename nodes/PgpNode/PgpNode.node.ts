@@ -105,7 +105,7 @@ export class PgpNode implements INodeType {
                 description: 'Choose the compression algorithm',
                 displayOptions: {
                     show: {
-												operation: ['encrypt', 'decrypt'],
+                        operation: ['encrypt', 'decrypt'],
                         inputType: ['binary'],
                     },
                 },
@@ -205,14 +205,16 @@ export class PgpNode implements INodeType {
             try {
                 operation = this.getNodeParameter('operation', itemIndex) as string;
                 inputType = this.getNodeParameter('inputType', itemIndex) as string;
+                compressionAlgorithm = 'uncompressed';
                 if (inputType === 'text') {
                     message = this.getNodeParameter('message', itemIndex) as string;
                     binaryPropertyName = '';
-                    compressionAlgorithm = 'uncompressed';
                 } else {
                     message = '';
                     binaryPropertyName = this.getNodeParameter('binaryPropertyName', itemIndex) as string;
-                    compressionAlgorithm = this.getNodeParameter('compressionAlgorithm', itemIndex) as string;
+                    if (operation === 'encrypt' || operation === 'decrypt') {
+                        compressionAlgorithm = this.getNodeParameter('compressionAlgorithm', itemIndex) as string;
+                    }
                 }
 
                 item = items[itemIndex];
@@ -221,14 +223,11 @@ export class PgpNode implements INodeType {
                 } else {
                     item.json = {};
                     if (!item.binary) {
-                        throw new NodeOperationError(this.getNode(), 'item.binary is not defined');
+                        throw new NodeOperationError(this.getNode(), 'binary is missing');
                     }
 
                     if (!item.binary[binaryPropertyName]) {
-                        throw new NodeOperationError(
-                            this.getNode(),
-                            `item.binary[${binaryPropertyName}] is not defined`,
-                        );
+                        throw new NodeOperationError(this.getNode(), `binary "${binaryPropertyName}" is not defined`);
                     }
                 }
 
