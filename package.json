@@ -1,6 +1,6 @@
 {
   "name": "@hapheus/n8n-nodes-pgp",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "n8n-nodes-pgp enables seamless integration of PGP encryption functionalities into n8n workflows. Create keys, encrypt, decrypt, sign, and verify messages effortlessly. Perfect for secure data handling in automated workflows.",
   "keywords": [
     "n8n-community-node-package",
