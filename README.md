@@ -20,10 +20,13 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-- Encrypt: Encrypts text using OpenPGP encryption.
-- Decrypt: Decrypts text using OpenPGP decryption.
-- Sign: Signs text using OpenPGP signing.
-- Verify: Verifies the signature of text using OpenPGP.
+- **Encrypt**: Encrypts text or binary files using a public key. Binary files can be compressed before encryption.
+- **Decrypt**: Decrypts text or binary files using a private key. Compressed files are automatically decompressed after decryption.
+- **Sign**: Creates a digital signature for text or binary files using a private key.
+- **Verify**: Checks if a digital signature is valid for text or binary files using a public key.
+- **Encrypt-And-Sign**: Encrypts and signs text or binary files in one step. Binary files can be compressed before encryption.
+- **Decrypt-And-Verify**: Decrypts and verifies text or binary files in one step. Compressed files can be decompressed after decryption.
+
 
 ## Credentials
 
