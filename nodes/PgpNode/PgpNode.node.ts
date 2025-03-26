@@ -186,9 +186,10 @@ export class PgpNode implements INodeType {
         let credentials;
         let priKey: PrivateKey;
         let pubKey: Key;
-        try {
-            credentials = await this.getCredentials('pgpCredentialsApi');
 
+        credentials = await this.getCredentials('pgpCredentialsApi');
+
+        try {
             if (credentials.passphrase) {
                 priKey = await openpgp.decryptKey({
                     privateKey: await openpgp.readPrivateKey({
@@ -201,12 +202,16 @@ export class PgpNode implements INodeType {
                     armoredKey: (credentials.private_key as string).trim(),
                 });
             }
+        } catch {
+            throw new NodeOperationError(this.getNode(), 'private key is not valid');
+        }
 
+        try {
             pubKey = await openpgp.readKey({
                 armoredKey: (credentials.public_key as string).trim(),
             });
-        } catch (e) {
-            return [];
+        } catch {
+            throw new NodeOperationError(this.getNode(), 'public key is not valid');
         }
 
         for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {

@@ -129,3 +129,17 @@ test('encrypts and decrypts a compressed binary file', async () => {
         BinaryUtils.uint8ArrayToBase64(binaryData),
     );
 });
+
+test('encrypts fails with invalid key', async () => {
+    const { privateKey, publicKey } = await generateKeyPair();
+    console.log(privateKey);
+    const message = 'This is a message to encrypt.';
+    const encrypted = await encryptText(message, publicKey);
+
+    expect(encrypted).toBeTruthy();
+    expect(encrypted).toContain('-----BEGIN PGP MESSAGE-----');
+
+    const decrypted = await decryptText(encrypted, privateKey);
+    expect(decrypted).toBeTruthy();
+    expect(decrypted).toEqual(message);
+});
