@@ -13,6 +13,6 @@ npm version $VERSION_TYPE
 git add package.json package-lock.json
 git commit -m "chore: bump version to $(node -p "require('./package.json').version")"
 git tag v$(node -p "require('./package.json').version")
-git push origin main --tags
+git push origin master --tags
 
 npm publish
