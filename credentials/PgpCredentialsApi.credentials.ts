@@ -17,6 +17,22 @@ export class PgpCredentialsApi implements ICredentialType {
             default: '',
             required: false,
         },
+				{
+					displayName: 'Key Method',
+					name: 'keyMehtod',
+					type: 'options',
+					options: [
+						{
+							name: 'Manual',
+							value: 'manual',
+						},
+						{
+							name: 'Server',
+							value: 'server',
+						}
+					],
+					default: 'manual',
+				},
         {
             displayName: 'Public Key',
             name: 'public_key',
@@ -27,6 +43,13 @@ export class PgpCredentialsApi implements ICredentialType {
             },
             default: '',
             required: false,
+						displayOptions:	{
+							show: {
+								keyMehtod: [
+									'manual'
+								]
+							}
+						}
         },
         {
             displayName: 'Private Key',
@@ -38,7 +61,44 @@ export class PgpCredentialsApi implements ICredentialType {
             },
             default: '',
             required: false,
+						displayOptions:	{
+							show: {
+								keyMehtod: [
+									'manual'
+								]
+							}
+						}
         },
+				{
+					displayName: 'Public Key',
+					name: 'publicKeyFile',
+					// eslint-disable-next-line n8n-nodes-base/cred-class-field-type-options-password-missing
+					type: 'string',
+					default: '',
+					description: 'Point to where you\'re public key is stored',
+					displayOptions: {
+						show: {
+								keyMehtod: [
+									'server'
+								]
+							}
+					},
+				},
+				{
+					displayName: 'Private Key',
+					name: 'privateKeyFile',
+					// eslint-disable-next-line n8n-nodes-base/cred-class-field-type-options-password-missing
+					type: 'string',
+					default: '',
+					description: 'Point to where you\'re private key is stored',
+					displayOptions: {
+						show: {
+								keyMehtod: [
+									'server'
+								]
+							}
+					},
+				},
     ];
 
     authenticate: IAuthenticateGeneric = {
