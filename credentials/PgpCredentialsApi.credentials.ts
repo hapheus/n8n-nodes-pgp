@@ -19,7 +19,7 @@ export class PgpCredentialsApi implements ICredentialType {
         },
 				{
 					displayName: 'Key Method',
-					name: 'keyMehtod',
+					name: 'keyMethod',
 					type: 'options',
 					options: [
 						{
@@ -45,7 +45,7 @@ export class PgpCredentialsApi implements ICredentialType {
             required: false,
 						displayOptions:	{
 							show: {
-								keyMehtod: [
+								keyMethod: [
 									'manual'
 								]
 							}
@@ -63,7 +63,7 @@ export class PgpCredentialsApi implements ICredentialType {
             required: false,
 						displayOptions:	{
 							show: {
-								keyMehtod: [
+								keyMethod: [
 									'manual'
 								]
 							}
@@ -78,7 +78,7 @@ export class PgpCredentialsApi implements ICredentialType {
 					description: 'Point to where you\'re public key is stored',
 					displayOptions: {
 						show: {
-								keyMehtod: [
+								keyMethod: [
 									'server'
 								]
 							}
@@ -93,7 +93,7 @@ export class PgpCredentialsApi implements ICredentialType {
 					description: 'Point to where you\'re private key is stored',
 					displayOptions: {
 						show: {
-								keyMehtod: [
+								keyMethod: [
 									'server'
 								]
 							}
