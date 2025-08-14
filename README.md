@@ -24,8 +24,17 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 - **Decrypt**: Decrypts text or binary files using a private key. Compressed files are automatically decompressed after decryption.
 - **Sign**: Creates a digital signature for text or binary files using a private key.
 - **Verify**: Checks if a digital signature is valid for text or binary files using a public key.
-- **Encrypt-And-Sign**: Encrypts and signs text or binary files in one step. Binary files can be compressed before encryption.
-- **Decrypt-And-Verify**: Decrypts and verifies text or binary files in one step. Compressed files can be decompressed after decryption.
+- **Encrypt-And-Sign**: Encrypts and signs text or binary files in one step. Binary files can be compressed before encryption. Supports both detached signatures (default) and embedded signatures.
+- **Decrypt-And-Verify**: Decrypts and verifies text or binary files in one step. Compressed files can be decompressed after decryption. Supports both detached signatures (default) and embedded signatures.
+
+### Embedded Signatures
+
+The **Encrypt-And-Sign** and **Decrypt-And-Verify** operations now support embedded signatures:
+
+- **Embed Signature** (Encrypt-And-Sign): When enabled, the signature is embedded within the encrypted message rather than provided as a separate output. This creates a standard OpenPGP message format that includes both encryption and signature verification in a single message.
+- **Embedded Signature** (Decrypt-And-Verify): When enabled, the node expects the message to contain an embedded signature and will automatically verify it during decryption. No separate signature input is required.
+
+By default, both options are disabled to maintain backward compatibility with existing workflows that use detached signatures.
 
 
 ## Credentials
@@ -113,8 +122,20 @@ npx jest
 * Binary decryption fails with a dirrent private key
 * Encryps and decrypts a compresses binary file
 
+**embedded-signature.test.ts**
+
+* Encrypts and decrypts text with embedded signature
+* Encrypts and decrypts text with embedded signature using encrypted private key
+* Decrypt fails with wrong private key but embedded signature verification still works
+* Encrypts and decrypts binary with embedded signature
+* Encrypts and decrypts binary with embedded signature using encrypted private key
+* Backward compatibility: detached signature still works
+* Embedded signature verification fails with wrong public key
+* Handle invalid messages gracefully
+* Handle messages without signatures gracefully
+
 #### Code Coverage:
-* Statements: 100%
+* Statements: 98.93%
 * Branches: 100%
 * Functions: 100%
-* Lines: 100%
+* Lines: 98.91%
