@@ -96,3 +96,91 @@ export async function verifyBinary(binaryData: Uint8Array, signature: string, pu
         return false;
     }
 }
+
+export async function encryptTextWithSignature(
+    message: string,
+    publicKey: Key,
+    privateKey: PrivateKey,
+): Promise<string> {
+    return (await openpgp.encrypt({
+        message: await openpgp.createMessage({ text: message }),
+        encryptionKeys: publicKey,
+        signingKeys: privateKey,
+        format: 'armored',
+    })) as string;
+}
+
+export async function encryptBinaryWithSignature(
+    data: Uint8Array,
+    publicKey: Key,
+    privateKey: PrivateKey,
+): Promise<string> {
+    return (await openpgp.encrypt({
+        message: await openpgp.createMessage({ binary: data }),
+        encryptionKeys: publicKey,
+        signingKeys: privateKey,
+        format: 'armored',
+    })) as string;
+}
+
+export async function decryptTextWithVerification(
+    message: string,
+    privateKey: PrivateKey,
+    publicKey: Key,
+): Promise<{ data: string; verified: boolean } | false> {
+    try {
+        const decrypted = await openpgp.decrypt({
+            message: await openpgp.readMessage({ armoredMessage: message }),
+            decryptionKeys: privateKey,
+            verificationKeys: publicKey,
+            format: 'utf8',
+        });
+
+        const { data, signatures } = decrypted;
+        let verified = false;
+
+        if (signatures && signatures.length > 0) {
+            try {
+                await signatures[0].verified;
+                verified = true;
+            } catch {
+                verified = false;
+            }
+        }
+
+        return { data: data as string, verified };
+    } catch {}
+
+    return false;
+}
+
+export async function decryptBinaryWithVerification(
+    message: string,
+    privateKey: PrivateKey,
+    publicKey: Key,
+): Promise<{ data: Uint8Array; verified: boolean } | false> {
+    try {
+        const decrypted = await openpgp.decrypt({
+            message: await openpgp.readMessage({ armoredMessage: message }),
+            decryptionKeys: privateKey,
+            verificationKeys: publicKey,
+            format: 'binary',
+        });
+
+        const { data, signatures } = decrypted;
+        let verified = false;
+
+        if (signatures && signatures.length > 0) {
+            try {
+                await signatures[0].verified;
+                verified = true;
+            } catch {
+                verified = false;
+            }
+        }
+
+        return { data: data as Uint8Array, verified };
+    } catch {}
+
+    return false;
+}

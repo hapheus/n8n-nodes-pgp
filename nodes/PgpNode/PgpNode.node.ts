@@ -16,6 +16,10 @@ import {
     decryptBinary,
     verifyText,
     verifyBinary,
+    encryptTextWithSignature,
+    encryptBinaryWithSignature,
+    decryptTextWithVerification,
+    decryptBinaryWithVerification,
 } from './utils/operations';
 import { BinaryUtils } from './utils/BinaryUtils';
 import { DataCompressor } from './utils/DataCompressor';
@@ -153,6 +157,7 @@ export class PgpNode implements INodeType {
                     show: {
                         inputType: ['text'],
                         operation: ['verify', 'decrypt-and-verify'],
+                        embeddedSignature: [false],
                     },
                 },
             },
@@ -165,6 +170,31 @@ export class PgpNode implements INodeType {
                     show: {
                         inputType: ['binary'],
                         operation: ['verify', 'decrypt-and-verify'],
+                        embeddedSignature: [false],
+                    },
+                },
+            },
+            {
+                displayName: 'Embed Signature',
+                name: 'embedSignature',
+                type: 'boolean',
+                default: false,
+                description: 'Whether to embed the signature in the encrypted message',
+                displayOptions: {
+                    show: {
+                        operation: ['encrypt-and-sign'],
+                    },
+                },
+            },
+            {
+                displayName: 'Embedded Signature',
+                name: 'embeddedSignature',
+                type: 'boolean',
+                default: false,
+                description: 'Whether the message contains an embedded signature',
+                displayOptions: {
+                    show: {
+                        operation: ['decrypt-and-verify'],
                     },
                 },
             },
@@ -182,6 +212,8 @@ export class PgpNode implements INodeType {
         let binaryPropertyName: string;
         let binaryPropertyNameSignature: string;
         let compressionAlgorithm: string;
+        let embedSignature: boolean;
+        let embeddedSignature: boolean;
 
         let credentials;
         let priKey: PrivateKey;
@@ -219,6 +251,8 @@ export class PgpNode implements INodeType {
                 operation = this.getNodeParameter('operation', itemIndex) as string;
                 inputType = this.getNodeParameter('inputType', itemIndex) as string;
                 compressionAlgorithm = 'uncompressed';
+                embedSignature = false;
+                embeddedSignature = false;
                 if (inputType === 'text') {
                     message = this.getNodeParameter('message', itemIndex) as string;
                     binaryPropertyName = '';
@@ -228,6 +262,13 @@ export class PgpNode implements INodeType {
                     if (operation === 'encrypt' || operation === 'decrypt') {
                         compressionAlgorithm = this.getNodeParameter('compressionAlgorithm', itemIndex) as string;
                     }
+                }
+
+                // Extract signature embedding options
+                if (operation === 'encrypt-and-sign') {
+                    embedSignature = this.getNodeParameter('embedSignature', itemIndex) as boolean;
+                } else if (operation === 'decrypt-and-verify') {
+                    embeddedSignature = this.getNodeParameter('embeddedSignature', itemIndex) as boolean;
                 }
 
                 item = items[itemIndex];
@@ -270,38 +311,76 @@ export class PgpNode implements INodeType {
                         break;
                     case 'encrypt-and-sign':
                         if (inputType === 'text') {
-                            item.json = {
-                                encrypted: await encryptText(message, pubKey),
-                                signature: await signText(message, priKey),
-                            };
+                            if (embedSignature) {
+                                // Use embedded signature
+                                item.json = {
+                                    encrypted: await encryptTextWithSignature(message, pubKey, priKey),
+                                };
+                            } else {
+                                // Use detached signature (current behavior)
+                                item.json = {
+                                    encrypted: await encryptText(message, pubKey),
+                                    signature: await signText(message, priKey),
+                                };
+                            }
                         } else {
                             let binaryDataEncryptAndSign = BinaryUtils.base64ToUint8Array(
                                 item.binary[binaryPropertyName].data,
                             );
-                            const signatureEncryptAndSign = await signBinary(binaryDataEncryptAndSign, priKey);
-                            if (compressionAlgorithm !== 'uncompressed') {
-                                binaryDataEncryptAndSign = DataCompressor.compress(
+                            if (embedSignature) {
+                                // Use embedded signature
+                                if (compressionAlgorithm !== 'uncompressed') {
+                                    binaryDataEncryptAndSign = DataCompressor.compress(
+                                        binaryDataEncryptAndSign,
+                                        compressionAlgorithm,
+                                    );
+                                }
+                                const encryptedMessage = await encryptBinaryWithSignature(
                                     binaryDataEncryptAndSign,
-                                    compressionAlgorithm,
+                                    pubKey,
+                                    priKey,
                                 );
+
+                                item.json = {};
+
+                                item.binary = {
+                                    message: {
+                                        data: BinaryUtils.uint8ArrayToBase64(
+                                            new TextEncoder().encode(encryptedMessage),
+                                        ),
+                                        mimeType: 'application/pgp-encrypted',
+                                        fileName: `${item.binary[binaryPropertyName].fileName}.pgp`,
+                                    },
+                                };
+                            } else {
+                                // Use detached signature (current behavior)
+                                const signatureEncryptAndSign = await signBinary(binaryDataEncryptAndSign, priKey);
+                                if (compressionAlgorithm !== 'uncompressed') {
+                                    binaryDataEncryptAndSign = DataCompressor.compress(
+                                        binaryDataEncryptAndSign,
+                                        compressionAlgorithm,
+                                    );
+                                }
+                                const encryptedMessage = await encryptBinary(binaryDataEncryptAndSign, pubKey);
+
+                                item.json = {};
+
+                                item.binary = {
+                                    message: {
+                                        data: BinaryUtils.uint8ArrayToBase64(
+                                            new TextEncoder().encode(encryptedMessage),
+                                        ),
+                                        mimeType: 'application/pgp-encrypted',
+                                        fileName: `${item.binary[binaryPropertyName].fileName}.pgp`,
+                                    },
+                                    signature: {
+                                        data: btoa(signatureEncryptAndSign as string),
+                                        mimeType: 'application/pgp-signature',
+                                        fileExtension: 'sig',
+                                        fileName: item.binary[binaryPropertyName].fileName + '.sig',
+                                    },
+                                };
                             }
-                            const encryptedMessage = await encryptBinary(binaryDataEncryptAndSign, pubKey);
-
-                            item.json = {};
-
-                            item.binary = {
-                                message: {
-                                    data: BinaryUtils.uint8ArrayToBase64(new TextEncoder().encode(encryptedMessage)),
-                                    mimeType: 'application/pgp-encrypted',
-                                    fileName: `${item.binary[binaryPropertyName].fileName}.pgp`,
-                                },
-                                signature: {
-                                    data: btoa(signatureEncryptAndSign as string),
-                                    mimeType: 'application/pgp-signature',
-                                    fileExtension: 'sig',
-                                    fileName: item.binary[binaryPropertyName].fileName + '.sig',
-                                },
-                            };
                         }
                         break;
                     case 'decrypt':
@@ -349,65 +428,121 @@ export class PgpNode implements INodeType {
                         break;
                     case 'decrypt-and-verify':
                         if (inputType === 'text') {
-                            const decrypted = await decryptText(message, priKey);
-                            if (decrypted === false) {
-                                throw new NodeOperationError(this.getNode(), 'Message could not be decrypted');
-                            }
-
-                            signature = this.getNodeParameter('signature', itemIndex) as string;
-                            const isVerifiedDecryptAndVerify = await verifyText(decrypted, signature, pubKey);
-
-                            item.json = {
-                                decrypted: decrypted,
-                                verified: isVerifiedDecryptAndVerify,
-                            };
-                        } else {
-                            const binaryDataDecryptAndVerify = atob(item.binary[binaryPropertyName].data);
-                            let decryptedMessage = await decryptBinary(binaryDataDecryptAndVerify, priKey);
-                            if (decryptedMessage === false) {
-                                throw new NodeOperationError(this.getNode(), 'Message could not be decrypted');
-                            }
-
-                            if (compressionAlgorithm !== 'uncompressed') {
-                                try {
-                                    decryptedMessage = DataCompressor.uncompress(
-                                        decryptedMessage,
-                                        compressionAlgorithm,
-                                    );
-                                } catch {
-                                    throw new NodeOperationError(
-                                        this.getNode(),
-                                        'Message could not be uncompressed. Please check your compression algorithm.',
-                                    );
+                            if (embeddedSignature) {
+                                // Handle embedded signature
+                                const result = await decryptTextWithVerification(message, priKey, pubKey);
+                                if (result === false) {
+                                    throw new NodeOperationError(this.getNode(), 'Message could not be decrypted');
                                 }
+
+                                item.json = {
+                                    decrypted: result.data,
+                                    verified: result.verified,
+                                };
+                            } else {
+                                // Handle detached signature (current behavior)
+                                const decrypted = await decryptText(message, priKey);
+                                if (decrypted === false) {
+                                    throw new NodeOperationError(this.getNode(), 'Message could not be decrypted');
+                                }
+
+                                signature = this.getNodeParameter('signature', itemIndex) as string;
+                                const isVerifiedDecryptAndVerify = await verifyText(decrypted, signature, pubKey);
+
+                                item.json = {
+                                    decrypted: decrypted,
+                                    verified: isVerifiedDecryptAndVerify,
+                                };
                             }
-                            binaryPropertyNameSignature = this.getNodeParameter(
-                                'binaryPropertyNameSignature',
-                                itemIndex,
-                            ) as string;
-                            const binarySignatureDataDecryptAndVerify = atob(
-                                item.binary[binaryPropertyNameSignature].data,
-                            );
+                        } else {
+                            if (embeddedSignature) {
+                                // Handle embedded signature
+                                const binaryDataDecryptAndVerify = atob(item.binary[binaryPropertyName].data);
+                                let decryptedMessageResult = await decryptBinaryWithVerification(
+                                    binaryDataDecryptAndVerify,
+                                    priKey,
+                                    pubKey,
+                                );
+                                if (decryptedMessageResult === false) {
+                                    throw new NodeOperationError(this.getNode(), 'Message could not be decrypted');
+                                }
 
-                            const isVerifiedDecryptAndVerified = await verifyBinary(
-                                decryptedMessage,
-                                binarySignatureDataDecryptAndVerify,
-                                pubKey,
-                            );
+                                if (compressionAlgorithm !== 'uncompressed') {
+                                    try {
+                                        decryptedMessageResult.data = DataCompressor.uncompress(
+                                            decryptedMessageResult.data,
+                                            compressionAlgorithm,
+                                        );
+                                    } catch {
+                                        throw new NodeOperationError(
+                                            this.getNode(),
+                                            'Message could not be uncompressed. Please check your compression algorithm.',
+                                        );
+                                    }
+                                }
 
-                            item.json = {
-                                verified: isVerifiedDecryptAndVerified,
-                            };
+                                item.json = {
+                                    verified: decryptedMessageResult.verified,
+                                };
 
-                            item.binary = {
-                                decrypted: {
-                                    data: BinaryUtils.uint8ArrayToBase64(decryptedMessage as Uint8Array),
-                                    mimeType: 'application/octet-stream',
-                                    fileName: item.binary[binaryPropertyName]?.fileName?.endsWith('.pgp')
-                                        ? item.binary[binaryPropertyName]?.fileName?.replace(/\.pgp$/, '')
-                                        : undefined,
-                                },
-                            };
+                                item.binary = {
+                                    decrypted: {
+                                        data: BinaryUtils.uint8ArrayToBase64(decryptedMessageResult.data),
+                                        mimeType: 'application/octet-stream',
+                                        fileName: item.binary[binaryPropertyName]?.fileName?.endsWith('.pgp')
+                                            ? item.binary[binaryPropertyName]?.fileName?.replace(/\.pgp$/, '')
+                                            : undefined,
+                                    },
+                                };
+                            } else {
+                                // Handle detached signature (current behavior)
+                                const binaryDataDecryptAndVerify = atob(item.binary[binaryPropertyName].data);
+                                let decryptedMessage = await decryptBinary(binaryDataDecryptAndVerify, priKey);
+                                if (decryptedMessage === false) {
+                                    throw new NodeOperationError(this.getNode(), 'Message could not be decrypted');
+                                }
+
+                                if (compressionAlgorithm !== 'uncompressed') {
+                                    try {
+                                        decryptedMessage = DataCompressor.uncompress(
+                                            decryptedMessage,
+                                            compressionAlgorithm,
+                                        );
+                                    } catch {
+                                        throw new NodeOperationError(
+                                            this.getNode(),
+                                            'Message could not be uncompressed. Please check your compression algorithm.',
+                                        );
+                                    }
+                                }
+                                binaryPropertyNameSignature = this.getNodeParameter(
+                                    'binaryPropertyNameSignature',
+                                    itemIndex,
+                                ) as string;
+                                const binarySignatureDataDecryptAndVerify = atob(
+                                    item.binary[binaryPropertyNameSignature].data,
+                                );
+
+                                const isVerifiedDecryptAndVerified = await verifyBinary(
+                                    decryptedMessage,
+                                    binarySignatureDataDecryptAndVerify,
+                                    pubKey,
+                                );
+
+                                item.json = {
+                                    verified: isVerifiedDecryptAndVerified,
+                                };
+
+                                item.binary = {
+                                    decrypted: {
+                                        data: BinaryUtils.uint8ArrayToBase64(decryptedMessage as Uint8Array),
+                                        mimeType: 'application/octet-stream',
+                                        fileName: item.binary[binaryPropertyName]?.fileName?.endsWith('.pgp')
+                                            ? item.binary[binaryPropertyName]?.fileName?.replace(/\.pgp$/, '')
+                                            : undefined,
+                                    },
+                                };
+                            }
                         }
                         break;
                     case 'sign':
