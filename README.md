@@ -72,14 +72,14 @@ This section displays the results of unit tests for each operation, based on a l
 
 | Operation        | Last Tested                                           | Status                                                 |
 |------------------|-------------------------------------------------------|--------------------------------------------------------|
-| Encrypt (Text)   | <span id="test-encrypt-text-date">2025-11-11</span>   | <span id="test-encrypt-text-result">✅ Success</span>   |
-| Decrypt (Text)   | <span id="test-decrypt-text-date">2025-11-11</span>   | <span id="test-decrypt-text-result">✅ Success</span>   |
-| Sign (Text)      | <span id="test-sign-text-date">2025-11-11</span>      | <span id="test-sign-text-result">✅ Success</span>      |
-| Verify (Text)    | <span id="test-verify-text-date">2025-11-11</span>    | <span id="test-verify-text-result">✅ Success</span>    |
-| Encrypt (Binary) | <span id="test-encrypt-binary-date">2025-11-11</span> | <span id="test-encrypt-binary-result">✅ Success</span> |
-| Decrypt (Binary) | <span id="test-decrypt-binary-date">2025-11-11</span> | <span id="test-decrypt-binary-result">✅ Success</span> |
-| Sign (Binary)    | <span id="test-sign-binary-date">2025-11-11</span>    | <span id="test-sign-binary-result">✅ Success</span>    |
-| Verify (Binary)  | <span id="test-verify-binary-date">2025-11-11</span>  | <span id="test-verify-binary-result">✅ Success</span>  |
+| Encrypt (Text)   | <span id="test-encrypt-text-date">2025-11-13</span>   | <span id="test-encrypt-text-result">✅ Success</span>   |
+| Decrypt (Text)   | <span id="test-decrypt-text-date">2025-11-13</span>   | <span id="test-decrypt-text-result">✅ Success</span>   |
+| Sign (Text)      | <span id="test-sign-text-date">2025-11-13</span>      | <span id="test-sign-text-result">✅ Success</span>      |
+| Verify (Text)    | <span id="test-verify-text-date">2025-11-13</span>    | <span id="test-verify-text-result">✅ Success</span>    |
+| Encrypt (Binary) | <span id="test-encrypt-binary-date">2025-11-13</span> | <span id="test-encrypt-binary-result">✅ Success</span> |
+| Decrypt (Binary) | <span id="test-decrypt-binary-date">2025-11-13</span> | <span id="test-decrypt-binary-result">✅ Success</span> |
+| Sign (Binary)    | <span id="test-sign-binary-date">2025-11-13</span>    | <span id="test-sign-binary-result">✅ Success</span>    |
+| Verify (Binary)  | <span id="test-verify-binary-date">2025-11-13</span>  | <span id="test-verify-binary-result">✅ Success</span>  |
 
 ### Unit Tests
 
